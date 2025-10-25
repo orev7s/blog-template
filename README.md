@@ -7,7 +7,6 @@ A complete, production-ready personal blog template built with Next.js 15, Supab
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
 
-**Demo**: [Your Demo URL Here]  
 **Documentation**: [View Full Docs](https://github.com/orev7s/blog-template)
 
 ## ✨ Features
