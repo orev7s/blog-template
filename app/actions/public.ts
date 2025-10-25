@@ -1,11 +1,11 @@
 "use server"
 
-import { cache } from "react"
+import { unstable_cache } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 
 export type Category = "fixes" | "thoughts" | "general"
 
-export const getPublishedPosts = cache(async (category?: Category) => {
+async function fetchPublishedPosts(category?: Category) {
   const supabase = await createClient()
   let query = supabase
     .from("posts")
@@ -24,9 +24,25 @@ export const getPublishedPosts = cache(async (category?: Category) => {
     ...p,
     excerpt: deriveExcerpt(p.content),
   }))
-})
+}
 
-export const getPostBySlug = cache(async (slug: string) => {
+const publishedPostsCache = new Map<string, ReturnType<typeof unstable_cache>>()
+
+export async function getPublishedPosts(category?: Category) {
+  const key = category ?? "all"
+  let cached = publishedPostsCache.get(key)
+  if (!cached) {
+    cached = unstable_cache(
+      async () => fetchPublishedPosts(category),
+      ["getPublishedPosts", key],
+      { revalidate: 10, tags: ["posts", `posts:${key}`] }
+    )
+    publishedPostsCache.set(key, cached)
+  }
+  return cached()
+}
+
+async function fetchPostBySlug(slug: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("posts")
@@ -36,9 +52,24 @@ export const getPostBySlug = cache(async (slug: string) => {
   if (error) throw error
   if (!data || !data.published) throw new Error("Post not found")
   return data
-})
+}
 
-export const getApprovedComments = cache(async (postId: string) => {
+const postBySlugCache = new Map<string, ReturnType<typeof unstable_cache>>()
+
+export async function getPostBySlug(slug: string) {
+  let cached = postBySlugCache.get(slug)
+  if (!cached) {
+    cached = unstable_cache(
+      async () => fetchPostBySlug(slug),
+      ["getPostBySlug", slug],
+      { revalidate: 10, tags: ["posts", `post:${slug}`] }
+    )
+    postBySlugCache.set(slug, cached)
+  }
+  return cached()
+}
+
+async function fetchApprovedComments(postId: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("comments")
@@ -48,7 +79,22 @@ export const getApprovedComments = cache(async (postId: string) => {
     .order("created_at", { ascending: true })
   if (error) throw error
   return data ?? []
-})
+}
+
+const commentsCache = new Map<string, ReturnType<typeof unstable_cache>>()
+
+export async function getApprovedComments(postId: string) {
+  let cached = commentsCache.get(postId)
+  if (!cached) {
+    cached = unstable_cache(
+      async () => fetchApprovedComments(postId),
+      ["getApprovedComments", postId],
+      { revalidate: 20, tags: ["comments", `comments:${postId}`] }
+    )
+    commentsCache.set(postId, cached)
+  }
+  return cached()
+}
 
 export async function trackView(postId: string, sessionId: string) {
   const supabase = await createClient()
@@ -91,7 +137,7 @@ export async function submitComment(prevState: any, formData: FormData) {
   }
 }
 
-export const getPostViewsCount = cache(async (postId: string): Promise<number> => {
+async function fetchPostViewsCount(postId: string): Promise<number> {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc("get_post_analytics", { post_uuid: postId })
   if (error) return 0
@@ -102,14 +148,29 @@ export const getPostViewsCount = cache(async (postId: string): Promise<number> =
     }
   } catch {}
   return 0
-})
+}
+
+const viewCountCache = new Map<string, ReturnType<typeof unstable_cache>>()
+
+export async function getPostViewsCount(postId: string): Promise<number> {
+  let cached = viewCountCache.get(postId)
+  if (!cached) {
+    cached = unstable_cache(
+      async () => fetchPostViewsCount(postId),
+      ["getPostViewsCount", postId],
+      { revalidate: 15, tags: ["views", `views:${postId}`] }
+    )
+    viewCountCache.set(postId, cached)
+  }
+  return cached()
+}
 
 // NEW: Batch fetch all view counts in a SINGLE query (eliminates N+1 problem)
-export const getBatchPostViewsCounts = cache(async (postIds: string[]): Promise<Record<string, number>> => {
+async function fetchBatchPostViewsCounts(postIds: string[]): Promise<Record<string, number>> {
   if (postIds.length === 0) return {}
-  
+
   const supabase = await createClient()
-  
+
   // Get all views in a single query by counting grouped by post_id
   const { data, error } = await supabase
     .from("post_views")
@@ -129,9 +190,26 @@ export const getBatchPostViewsCounts = cache(async (postIds: string[]): Promise<
       viewsMap[view.post_id] = (viewsMap[view.post_id] || 0) + 1
     }
   }
-  
+
   return viewsMap
-})
+}
+
+const batchViewsCache = new Map<string, ReturnType<typeof unstable_cache>>()
+
+export async function getBatchPostViewsCounts(postIds: string[]): Promise<Record<string, number>> {
+  const key = [...postIds].sort().join("|")
+  if (!key) return {}
+  let cached = batchViewsCache.get(key)
+  if (!cached) {
+    cached = unstable_cache(
+      async () => fetchBatchPostViewsCounts(postIds),
+      ["getBatchPostViewsCounts", key],
+      { revalidate: 15, tags: ["views"] }
+    )
+    batchViewsCache.set(key, cached)
+  }
+  return cached()
+}
 
 export async function reactToPostAction(prevState: any, formData: FormData) {
   try {

@@ -2,6 +2,8 @@
 
 import { useTransition, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+
+import { schedulePrefetch } from "@/lib/prefetch-utils"
 import { cn } from "@/lib/utils"
 
 interface Tab {
@@ -31,13 +33,11 @@ export function CategoryTabs() {
       const url = tab.value ? `/?category=${tab.value}` : "/"
       if (prefetchedRef.current.has(url)) return
       prefetchedRef.current.add(url)
-      
-      // Prefetch first tab immediately, rest staggered
-      if (index === 0) {
-        router.prefetch(url)
-      } else {
-        setTimeout(() => router.prefetch(url), index * 30)
-      }
+
+      const delay = index === 0 ? 0 : index * 35
+      schedulePrefetch(() => {
+        void router.prefetch(url)
+      }, delay)
     })
   }, [router])
 
