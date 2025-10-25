@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 
+import { schedulePrefetch } from "@/lib/prefetch-utils"
+
 interface AggressivePrefetchProps {
   slugs: string[]
 }
@@ -14,18 +16,14 @@ export function AggressivePrefetch({ slugs }: AggressivePrefetchProps) {
   useEffect(() => {
     // IMMEDIATELY prefetch the first 10 articles on mount
     slugs.forEach((slug, index) => {
-      if (prefetchedRef.current.has(slug)) return
-      prefetchedRef.current.add(slug)
-      
-      // Prefetch first 3 immediately, rest staggered
-      if (index < 3) {
-        router.prefetch(`/posts/${slug}`)
-      } else {
-        // Stagger the rest with a tiny delay
-        setTimeout(() => {
-          router.prefetch(`/posts/${slug}`)
-        }, index * 50)
-      }
+      const href = `/posts/${slug}`
+      if (prefetchedRef.current.has(href)) return
+      prefetchedRef.current.add(href)
+
+      const delay = index < 3 ? 0 : index * 40
+      schedulePrefetch(() => {
+        void router.prefetch(href)
+      }, delay)
     })
   }, [slugs, router])
 
@@ -41,7 +39,9 @@ export function AggressivePrefetch({ slugs }: AggressivePrefetchProps) {
         const href = link.getAttribute("href")
         if (href && !prefetchedRef.current.has(href)) {
           prefetchedRef.current.add(href)
-          router.prefetch(href)
+          schedulePrefetch(() => {
+            void router.prefetch(href)
+          }, 20)
         }
       }
     }

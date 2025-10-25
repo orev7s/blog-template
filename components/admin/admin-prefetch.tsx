@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 
+import { schedulePrefetch } from "@/lib/prefetch-utils"
+
 const ADMIN_ROUTES = [
   "/admin",
   "/admin/posts",
@@ -22,13 +24,10 @@ export function AdminPrefetch() {
 
     // IMMEDIATELY prefetch all admin routes for instant navigation
     ADMIN_ROUTES.forEach((route, index) => {
-      if (index < 2) {
-        // Prefetch first 2 immediately
-        router.prefetch(route)
-      } else {
-        // Stagger the rest
-        setTimeout(() => router.prefetch(route), index * 50)
-      }
+      const delay = index < 2 ? 0 : index * 45
+      schedulePrefetch(() => {
+        void router.prefetch(route)
+      }, delay)
     })
   }, [router])
 

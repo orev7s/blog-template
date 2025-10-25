@@ -1,6 +1,12 @@
+"use client"
+
 import Link from "next/link"
+import { useCallback, useRef } from "react"
+import { useRouter } from "next/navigation"
+
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { schedulePrefetch } from "@/lib/prefetch-utils"
 
 type Category = "fixes" | "thoughts" | "general"
 
@@ -21,6 +27,8 @@ const categoryStyles: Record<Category, { label: string; className: string }> = {
 }
 
 export function PostCard({ post }: { post: PostCardData }) {
+  const router = useRouter()
+  const prefetchedRef = useRef(false)
   const cat = categoryStyles[post.category]
 
   const date = new Date(post.created_at)
@@ -30,13 +38,26 @@ export function PostCard({ post }: { post: PostCardData }) {
     day: "numeric",
   })
 
+  const href = `/posts/${post.slug}`
+
+  const triggerPrefetch = useCallback(() => {
+    if (prefetchedRef.current) return
+    prefetchedRef.current = true
+    schedulePrefetch(() => {
+      void router.prefetch(href)
+    })
+  }, [href, router])
+
   return (
     <Link
-      href={`/posts/${post.slug}`}
+      href={href}
       prefetch={true}
       className={cn(
         "group block rounded-lg border bg-card p-5 transition-colors hover:bg-secondary"
       )}
+      onPointerEnter={triggerPrefetch}
+      onFocus={triggerPrefetch}
+      onTouchStart={triggerPrefetch}
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <Badge className={cn("capitalize", cat.className)}>{cat.label}</Badge>
