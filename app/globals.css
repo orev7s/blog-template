@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Creamy light mode colors */
+    --background: 42 45% 97%; /* Creamy white */
+    --foreground: 30 15% 15%; /* Dark brown text */
+    --card: 40 35% 95%;
+    --card-foreground: 30 15% 15%;
+    --popover: 40 35% 95%;
+    --popover-foreground: 30 15% 15%;
+    --primary: 24 85% 55%; /* Warm orange */
+    --primary-foreground: 42 45% 97%;
+    --secondary: 38 45% 88%;
+    --secondary-foreground: 30 15% 15%;
+    --muted: 38 25% 90%;
+    --muted-foreground: 30 15% 45%;
+    --accent: 24 75% 60%;
+    --accent-foreground: 42 45% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 15% 85%;
+    --input: 30 15% 85%;
+    --ring: 24 85% 55%;
+    --radius: 0.5rem;
+    --chart-1: 24 85% 55%;
+    --chart-2: 38 75% 65%;
+    --chart-3: 30 60% 70%;
+    --chart-4: 35 70% 60%;
+    --chart-5: 28 65% 58%;
+  }
+
+  .dark {
+    --background: 30 15% 8%; /* Dark mode background */
+    --foreground: 42 45% 95%;
+    --card: 30 15% 10%;
+    --card-foreground: 42 45% 95%;
+    --popover: 30 15% 10%;
+    --popover-foreground: 42 45% 95%;
+    --primary: 24 85% 55%;
+    --primary-foreground: 30 15% 8%;
+    --secondary: 30 15% 15%;
+    --secondary-foreground: 42 45% 95%;
+    --muted: 30 15% 15%;
+    --muted-foreground: 42 25% 60%;
+    --accent: 24 75% 50%;
+    --accent-foreground: 42 45% 95%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 42 45% 95%;
+    --border: 30 15% 20%;
+    --input: 30 15% 20%;
+    --ring: 24 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  
+  /* Hide scrollbar globally */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
+
+@layer utilities {
+  .font-georgia {
+    font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  }
+}
+
+/* Post content rendering fixes */
+@layer base {
+  /* Ensure proper spacing for paragraphs in post content */
+  .prose p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  /* Ensure headings have proper spacing */
+  .prose h1 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 800;
+  }
+
+  .prose h2 {
+    margin-top: 1.75rem;
+    margin-bottom: 0.875rem;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
+  }
+
+  .prose h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+  }
+
+  /* Preserve line breaks and spacing */
+  .prose {
+    white-space: normal;
+  }
+
+  /* Ensure first paragraph doesn't have top margin */
+  .prose > p:first-child,
+  .prose > h1:first-child,
+  .prose > h2:first-child,
+  .prose > h3:first-child {
+    margin-top: 0;
+  }
+
+  /* Better list spacing */
+  .prose ul,
+  .prose ol {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+    padding-left: 1.625em;
+  }
+
+  .prose li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  /* Code blocks */
+  .prose code {
+    font-size: 0.875em;
+  }
+
+  /* Images */
+  .prose img {
+    margin-top: 2em;
+    margin-bottom: 2em;
+    border-radius: 0.5rem;
+  }
+}
