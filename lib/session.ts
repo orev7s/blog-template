@@ -26,7 +26,13 @@ export function getOrCreateSessionId(): string {
 export function useSessionId() {
   const [id, setId] = useState<string>("")
   useEffect(() => {
-    setId(getOrCreateSessionId())
+    try {
+      setId(getOrCreateSessionId())
+    } catch (error) {
+      // If localStorage fails, generate a temporary session ID
+      console.warn("Failed to access localStorage for session ID:", error)
+      setId(generateId())
+    }
   }, [])
   return id
 }

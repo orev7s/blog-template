@@ -7,7 +7,7 @@ import Image from "@tiptap/extension-image"
 import { TextStyle } from "@tiptap/extension-text-style"
 import FontFamily from "@tiptap/extension-font-family"
 import { ArticleMention } from "./article-mention-extension"
-import ArticleMentionNode from "./article-mention-node"
+import { ArticleMentionNodeWrapper } from "./article-mention-node"
 import "./editor.css"
 
 interface PostContentRendererProps {
@@ -34,7 +34,7 @@ export default function PostContentRenderer({ content }: PostContentRendererProp
         },
       }).extend({
         addNodeView() {
-          return ReactNodeViewRenderer(ArticleMentionNode)
+          return ReactNodeViewRenderer(ArticleMentionNodeWrapper)
         },
       }),
     ],

@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { NodeViewWrapper } from "@tiptap/react"
+import { NodeViewWrapper, ReactNodeViewProps } from "@tiptap/react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
@@ -14,6 +14,22 @@ export interface ArticleMentionNodeProps {
       category: string
     }
   }
+}
+
+// Wrapper component that bridges ReactNodeViewProps to ArticleMentionNodeProps
+export function ArticleMentionNodeWrapper(props: ReactNodeViewProps<HTMLElement>) {
+  const { node } = props
+  const articleProps: ArticleMentionNodeProps = {
+    node: {
+      attrs: {
+        id: node.attrs.id || '',
+        label: node.attrs.label || '',
+        slug: node.attrs.slug || '',
+        category: node.attrs.category || ''
+      }
+    }
+  }
+  return <ArticleMentionNode {...articleProps} />
 }
 
 // Document SVG Icon

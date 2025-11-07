@@ -1,20 +1,13 @@
 export type PrefetchTask = () => void
 
-interface IdleDeadline {
+// Type for requestIdleCallback if not available in the environment
+type RequestIdleCallbackHandle = number
+type RequestIdleCallbackDeadline = {
   didTimeout: boolean
   timeRemaining(): number
 }
-
-type IdleCallbackHandle = number
-
-type IdleCallbackOptions = {
+type RequestIdleCallbackOptions = {
   timeout?: number
-}
-
-declare global {
-  interface Window {
-    requestIdleCallback?: (callback: (deadline: IdleDeadline) => void, opts?: IdleCallbackOptions) => IdleCallbackHandle
-  }
 }
 
 export function schedulePrefetch(task: PrefetchTask, delay = 0) {
@@ -30,8 +23,12 @@ export function schedulePrefetch(task: PrefetchTask, delay = 0) {
     }
   }
 
-  if (typeof window.requestIdleCallback === "function") {
-    window.requestIdleCallback(
+  // Use type assertion to handle requestIdleCallback
+  const requestIdleCallback = (window as any).requestIdleCallback as 
+    ((callback: (deadline: RequestIdleCallbackDeadline) => void, options?: RequestIdleCallbackOptions) => RequestIdleCallbackHandle) | undefined
+  
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(
       () => {
         runTask()
       },

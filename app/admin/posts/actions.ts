@@ -29,7 +29,16 @@ export async function createPostAction(_prev: ActionState, formData: FormData): 
     const publishedToggle = String(formData.get("published") || "off");
 
     const published = intent === "publish" ? true : publishedToggle === "on";
-    const content = { json: JSON.parse(contentStr || "{}"), html: contentHtml };
+    
+    // Safely parse JSON content with error handling
+    let parsedJson;
+    try {
+      parsedJson = JSON.parse(contentStr || "{}");
+    } catch (e) {
+      return { error: "Invalid content format. Please check your content and try again." };
+    }
+    
+    const content = { json: parsedJson, html: contentHtml };
     const category =
       categoryRaw === "Fixes"
         ? "fixes"
@@ -66,7 +75,16 @@ export async function updatePostAction(_prev: ActionState, formData: FormData): 
     const publishedToggle = String(formData.get("published") || "off");
 
     const published = intent === "publish" ? true : publishedToggle === "on";
-    const content = { json: JSON.parse(contentStr || "{}"), html: contentHtml };
+    
+    // Safely parse JSON content with error handling
+    let parsedJson;
+    try {
+      parsedJson = JSON.parse(contentStr || "{}");
+    } catch (e) {
+      return { error: "Invalid content format. Please check your content and try again." };
+    }
+    
+    const content = { json: parsedJson, html: contentHtml };
     const category =
       categoryRaw === "Fixes"
         ? "fixes"
