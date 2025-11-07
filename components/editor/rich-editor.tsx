@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/select";
 import { uploadImage } from "@/lib/upload-image";
 import { cn } from "@/lib/utils";
 import { ArticleMention } from "./article-mention-extension";
-import ArticleMentionNode from "./article-mention-node";
+import { ArticleMentionNodeWrapper } from "./article-mention-node";
 import "tippy.js/dist/tippy.css";
 import "./editor.css";
 
@@ -53,7 +53,7 @@ export default function RichEditor({ className, value, onChange }: RichEditorPro
         },
       }).extend({
         addNodeView() {
-          return ReactNodeViewRenderer(ArticleMentionNode)
+          return ReactNodeViewRenderer(ArticleMentionNodeWrapper)
         },
       }),
     ],
